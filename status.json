@@ -1,45 +1,45 @@
 {
- "checked_at": "2026-10-25T19:00:10+00:00",
+ "checked_at": "2026-10-25T19:10:08+00:00",
  "overall": "up",
  "services": {
   "site": {
    "name": "triotheo.com",
    "url": "https://triotheo.com/",
    "state": "up",
-   "ok_this_run": true,
-   "ms": 282,
-   "note": ""
+   "ok_this_run": false,
+   "ms": 20066,
+   "note": "no answer error: URLError"
   },
   "api": {
    "name": "API",
    "url": "https://triotheo.com/api/health",
    "state": "up",
-   "ok_this_run": true,
-   "ms": 223,
-   "note": ""
+   "ok_this_run": false,
+   "ms": 20087,
+   "note": "no answer error: URLError"
   },
   "lessons": {
    "name": "Learn lessons",
    "url": "https://triotheo.com/learn/guess_who/guess-lazarus/manifest.json",
    "state": "up",
-   "ok_this_run": true,
-   "ms": 213,
-   "note": ""
+   "ok_this_run": false,
+   "ms": 20085,
+   "note": "no answer error: URLError"
   },
   "beta": {
    "name": "beta.triotheo.com",
    "url": "https://beta.triotheo.com/",
    "state": "up",
-   "ok_this_run": true,
-   "ms": 248,
-   "note": ""
+   "ok_this_run": false,
+   "ms": 20083,
+   "note": "no answer error: URLError"
   }
  },
  "raw": {
-  "site": true,
-  "api": true,
-  "lessons": true,
-  "beta": true
+  "site": false,
+  "api": false,
+  "lessons": false,
+  "beta": false
  },
  "every_minutes": 10,
  "source": "GitHub Actions runners"
