@@ -7,7 +7,7 @@ name: uptime
 # and on this repository it never fired at all: zero scheduled runs in five and a half hours, through "*/10"
 # and then the off-the-hour "4-59/10" GitHub's own docs recommend, while every manual dispatch ran at once.
 # So the ten-minute cadence comes from OUTSIDE: a cron-job.org job POSTs the workflow_dispatch endpoint
-#   POST https://api.github.com/repos/loag-io/triotheo-status/actions/workflows/uptime.yml/dispatches
+#   POST https://api.github.com/repos/triotheo/status/actions/workflows/uptime.yml/dispatches
 #   {"ref": "main"}   →   204 No Content
 # with a fine-grained token that can do one thing — Actions read/write on this repository and no other.
 # The token lives only in that job (never in this repo); cron-job.org emails the owner if a call fails.
