@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-14T13:30:14+00:00",
+ "checked_at": "2026-11-14T13:40:14+00:00",
  "overall": "up",
  "services": {
   "site": {
@@ -7,7 +7,7 @@
    "url": "https://triotheo.com/",
    "state": "up",
    "ok_this_run": true,
-   "ms": 75,
+   "ms": 68,
    "note": ""
   },
   "api": {
@@ -31,7 +31,7 @@
    "url": "https://beta.triotheo.com/",
    "state": "up",
    "ok_this_run": true,
-   "ms": 54,
+   "ms": 60,
    "note": ""
   }
  },
