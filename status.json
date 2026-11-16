@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-16T03:00:18+00:00",
+ "checked_at": "2026-11-16T03:10:12+00:00",
  "overall": "up",
  "services": {
   "site": {
@@ -15,7 +15,7 @@
    "url": "https://triotheo.com/api/health",
    "state": "up",
    "ok_this_run": true,
-   "ms": 214,
+   "ms": 243,
    "note": ""
   },
   "lessons": {
@@ -31,7 +31,7 @@
    "url": "https://beta.triotheo.com/",
    "state": "up",
    "ok_this_run": true,
-   "ms": 272,
+   "ms": 254,
    "note": ""
   }
  },
