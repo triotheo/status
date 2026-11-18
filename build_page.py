@@ -34,6 +34,9 @@ PEN = (HERE / "pen.js").read_text()
 # 5507 through the landing's own jitterCircle — copied exactly. Regenerate them from that source if the landing's change.
 SUN_D = "M 15.8 12.0 Q 15.8 12.0 15.5 12.9 Q 15.2 13.8 14.4 14.3 Q 13.6 14.8 12.8 15.3 Q 12.0 15.7 11.1 15.4 Q 10.2 15.1 9.3 14.6 Q 8.5 14.0 7.9 13.0 Q 7.3 12.0 8.0 11.1 Q 8.8 10.2 9.4 9.4 Q 10.0 8.6 11.0 8.2 Q 12.0 7.7 12.9 8.4 Q 13.7 9.0 14.7 9.5 Q 15.6 9.9 15.7 11.0 Z M 17.9 12.6 L 21.2 12.7 M 16.7 17.8 L 17.8 19.5 M 12.6 18.9 L 12.6 20.2 M 7.3 15.8 L 4.7 17.2 M 4.9 11.3 L 2.1 11.5 M 8.0 6.7 L 7.5 5.8 M 13.2 6.2 L 14.5 3.9 M 16.4 7.8 L 18.8 6.4"
 MOON_D = "M 15.5 18.9 Q 15.5 18.9 14.4 19.1 Q 13.3 19.3 12.1 19.1 Q 10.9 18.9 9.3 19.0 Q 7.6 19.0 6.6 18.3 Q 5.5 17.5 5.3 16.4 Q 5.0 15.3 4.5 13.7 Q 4.1 12.1 4.5 10.6 Q 4.9 9.2 5.3 7.8 Q 5.7 6.5 7.2 5.8 Q 8.6 5.0 9.5 4.5 Q 10.5 4.0 11.8 4.1 Q 13.1 4.2 14.4 4.7 Q 15.7 5.3 16.5 5.4 Q 17.4 5.6 16.1 5.0 Q 14.9 4.5 13.7 4.3 Q 12.5 4.1 11.5 5.1 Q 10.6 6.1 9.9 6.6 Q 9.2 7.0 9.3 8.8 Q 9.4 10.5 9.6 11.2 Q 9.8 12.0 10.0 12.8 Q 10.2 13.6 11.3 14.6 Q 12.4 15.7 14.2 15.3 Q 15.9 15.0 16.5 14.7 Z"
+# The coin centres its glyph's box, so each is drawn at its own ink's offset (#1865; Landing.tsx / TopBar.tsx SUN_BOX / MOON_BOX).
+SUN_BOX = "-0.35 0.05 24 24"
+MOON_BOX = "-1.4 -0.35 24 24"
 
 CSS = f"""
 {faces}
@@ -148,32 +151,23 @@ function dateHd(d) { return d.toLocaleDateString(undefined, { month: "short", da
 function dur(a, b) { var m = Math.max(1, Math.round((new Date(b || Date.now()) - new Date(a)) / 60000)); return m < 60 ? m + " min" : (m / 60).toFixed(1).replace(/\.0$/, "") + " h"; }
 function localDay(iso) { var d = new Date(iso); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 function coinSVG(yarn, seed) {
-  var box = 68, r = 26, ring = "color-mix(in srgb, " + yarn + " 80%, #000000)";
+  var box = 68, r = 26, ring = "color-mix(in srgb, " + yarn + " 80%, #000000)", face = jitterCircle(r, box, seed, Math.min(1.6, ringAmp(r)));
   return '<svg viewBox="0 0 ' + box + ' ' + box + '" aria-hidden="true" style="' + SVG_STYLE + '">'
-    + '<path d="' + jitterCircle(r, box, seed + 3, 1.3) + '" fill="' + yarn + '" transform="translate(3.2 2.8)"/>'
-    + '<path d="' + jitterCircle(r, box, seed, 1.6) + '" fill="none" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
+    + '<path d="' + face + '" fill="' + yarn + '"/>'
+    + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
 }
-/* a FILLED drawn card — the banner — in the house pen's hand (jitterRect, same seeds style) */
+/* a FILLED drawn card — the banner — in the calm pen's hand (calmSketchPaths, the fill in its line's own path; #1851) */
 function fillCard(el, yarn) {
   var wrap = el.querySelector(".btn-svg"), seed = +el.dataset.seed, ring = "color-mix(in srgb, " + yarn + " 78%, #000000)";
   once(el, function () {
     var w = el.offsetWidth, h = el.offsetHeight; if (!w || !h) return;
-    var rr = Math.min(20, h / 2 - 1), d1 = jitterRect(w, h, rr, seed, 1.3), d2 = jitterRect(w, h, rr, seed + 7, 1.2);
+    var pp = calmSketchPaths(w, h, 20, seed), P = SKETCH_PASS;
     wrap.innerHTML = '<svg viewBox="-6 -6 ' + (w + 12) + ' ' + (h + 12) + '" aria-hidden="true" style="' + SVG_STYLE + '">'
-      + '<path d="' + d1 + '" fill="' + yarn + '" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
-      + '<path d="' + d2 + '" fill="none" stroke="' + ring + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" transform="translate(1.3 1.1)"/></svg>';
+      + '<path d="' + pp[0] + '" fill="' + yarn + '" stroke="' + ring + '" stroke-width="' + P.w1 + '" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '<path d="' + pp[1] + '" fill="none" stroke="' + ring + '" stroke-width="' + P.w2 + '" stroke-linecap="round" stroke-linejoin="round" opacity="' + P.opacity + '" transform="translate(' + P.slip[0] + ' ' + P.slip[1] + ')"/></svg>';
   });
 }
 var YARN = { up: "var(--brand-green)", partial: "var(--brand-orange)", down: "var(--brand-scarlet)" };
-// pen.js's drawnStadium stood on its end — the same points, the same wobble (0.8), the tube a day is drawn as
-function capsule(w, h, seed) {
-  var r = w / 2;
-  var pts = [[w, r], [w, h / 2], [w, h - r]]
-    .concat(arcPts(r, h - r, r, r, 0, Math.PI, 5))
-    .concat([[0, h - r], [0, h / 2], [0, r]])
-    .concat(arcPts(r, r, r, r, Math.PI, 2 * Math.PI, 5));
-  return wobblePath(pts, seed, 0.8, true);
-}
 function drawStrip(el) {
   var list = (S.strips || {})[el.dataset.id], W = el.clientWidth, H = el.clientHeight; if (!list || !W || !H) return;
   // a PILL, never a bean: a day's tube is at most 14px wide, centred in its thirtieth of the strip (at ~23px a slot on
@@ -182,10 +176,10 @@ function drawStrip(el) {
   list.forEach(function (d, i) {
     var s = base + i * 13, yarn = YARN[d.cls], x = (i * slot + (slot - w) / 2).toFixed(1);
     out += '<g transform="translate(' + x + ' 0)"><title>' + esc(d.tip) + '</title>'
-      + '<path d="' + capsule(w, H, s) + '" fill="var(--coin-ghost)"/>'
-      + '<path d="' + capsule(w, H, s) + '" fill="none" stroke="var(--nav-border)" stroke-width="2.2" stroke-linecap="round"/>'
-      + '<path d="' + capsule(w, H, s + 7) + '" fill="none" stroke="var(--nav-border)" stroke-width="2" stroke-linecap="round" opacity="0.55" transform="translate(1.6 1.4)"/>'
-      + (yarn ? '<path d="' + capsule(w, H, s + 1) + '" fill="' + yarn + '" stroke="color-mix(in srgb, ' + yarn + ' 78%, #000000)" stroke-width="2" stroke-linecap="round"/>' : "")
+      + '<path d="' + drawnStadium(w, H, s) + '" fill="var(--coin-ghost)"/>'
+      + '<path d="' + drawnStadium(w, H, s) + '" fill="none" stroke="var(--nav-border)" stroke-width="' + PILL_PASS.w1 + '" stroke-linecap="round"/>'
+      + '<path d="' + drawnStadium(w, H, s + 7) + '" fill="none" stroke="var(--nav-border)" stroke-width="' + PILL_PASS.w2 + '" stroke-linecap="round" opacity="' + PILL_PASS.opacity + '" transform="translate(' + PILL_PASS.slip[0] + ' ' + PILL_PASS.slip[1] + ')"/>'
+      + (yarn ? '<path d="' + drawnStadium(w, H, s + 1) + '" fill="' + yarn + '" stroke="color-mix(in srgb, ' + yarn + ' 78%, #000000)" stroke-width="' + PILL_PASS.w2 + '" stroke-linecap="round"/>' : "")
       + '</g>';
   });
   el.innerHTML = '<svg width="' + (W + 8) + '" height="' + (H + 8) + '" viewBox="-4 -4 ' + (W + 8) + ' ' + (H + 8) + '" aria-hidden="true">' + out + '</svg>';
@@ -248,9 +242,9 @@ function render() {
   // THE PAGER — a back coin and a forward coin in CoinBack's dress with the count between them; the coin
   // with nowhere to go is ghosted, never hidden (a hidden control reads as a bug — the house rule)
   var more = document.getElementById("more");
-  more.innerHTML = '<button type="button" class="pcoin" data-dir="-1" aria-label="Newer week"' + (page === 0 ? " disabled" : "") + '><span class="btn-svg"></span><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="' + CHEV_L + '" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+  more.innerHTML = '<button type="button" class="pcoin" data-dir="-1" aria-label="Newer week"' + (page === 0 ? " disabled" : "") + '><span class="btn-svg"></span><svg class="glyph" viewBox="0.1 0 24 24" aria-hidden="true"><path d="' + caretPath("left") + '" fill="none" stroke="currentColor" stroke-width="' + CARET_PEN + '" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
     + '<span class="pcount">' + (page + 1) + ' of ' + pages + '</span>'
-    + '<button type="button" class="pcoin is-right" data-dir="1" aria-label="Older week"' + (page === pages - 1 ? " disabled" : "") + '><span class="btn-svg"></span><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="' + CHEV_L + '" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(24 0) scale(-1 1)"/></svg></button>';
+    + '<button type="button" class="pcoin is-right" data-dir="1" aria-label="Older week"' + (page === pages - 1 ? " disabled" : "") + '><span class="btn-svg"></span><svg class="glyph" viewBox="-0.1 0 24 24" aria-hidden="true"><path d="' + caretPath("left") + '" fill="none" stroke="currentColor" stroke-width="' + CARET_PEN + '" stroke-linecap="round" stroke-linejoin="round" transform="translate(24 0) scale(-1 1)"/></svg></button>';
   more.querySelectorAll(".pcoin").forEach(function (b) {
     coinInto(b, "var(--brand-blue)", b.disabled);
     b.addEventListener("click", function () { S.page = page + (+b.dataset.dir); render(); });
@@ -258,23 +252,23 @@ function render() {
   document.querySelectorAll(".card.sk").forEach(sketch);
 }
 // CoinBack, as the Learn app draws it: a ghost coin at seed 9021 in the family yarn, the ring the yarn's 78%
-// dark variant, the chevron DoodleChevronLeft's own points at its own seed (9601, amp 0.35) in the 60% mark
-var CHEV_L = wobblePath([[14.6, 5.4], [11.2, 8.7], [7.8, 12], [11.2, 15.3], [14.6, 18.6]], 9601, 0.35);
+// dark variant at the calm ring hand, the fill in the ring's own path (#1851), the chevron the house's one caret (caretPath) in the 60% mark
 function coinInto(el, yarn, ghost) {
   var ring = "color-mix(in srgb, " + yarn + " 78%, #000000)", box = 68, r = 26;
-  var fill = ghost ? "var(--coin-ghost)" : yarn, stroke = ghost ? "var(--nav-border)" : ring;
+  var fill = ghost ? "var(--coin-ghost)" : yarn, stroke = ghost ? "var(--nav-border)" : ring, face = jitterCircle(r, box, 9021, Math.min(1.6, ringAmp(r)));
   el.querySelector(".btn-svg").innerHTML = '<svg viewBox="0 0 ' + box + ' ' + box + '" aria-hidden="true" style="' + SVG_STYLE + '">'
-    + '<path d="' + jitterCircle(r, box, 9021 + 3, 1.3) + '" fill="' + fill + '" transform="translate(3.2 2.8)"/>'
-    + '<path d="' + jitterCircle(r, box, 9021, 1.6) + '" fill="none" stroke="' + stroke + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
+    + '<path d="' + face + '" fill="' + fill + '"/>'
+    + '<path d="' + face + '" fill="none" stroke="' + stroke + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
   el.style.color = ghost ? "var(--divider-ink)" : "color-mix(in srgb, " + yarn + " 60%, #000000)";
 }
 function backInit() {
   var a = document.getElementById("back"), yarn = "var(--brand-blue)", ring = "color-mix(in srgb, " + yarn + " 78%, #000000)";
-  var box = 68, r = 26;
+  var box = 68, r = 26, face = jitterCircle(r, box, 9021, Math.min(1.6, ringAmp(r)));
   a.querySelector(".btn-svg").innerHTML = '<svg viewBox="0 0 ' + box + ' ' + box + '" aria-hidden="true" style="' + SVG_STYLE + '">'
-    + '<path d="' + jitterCircle(r, box, 9021 + 3, 1.3) + '" fill="' + yarn + '" transform="translate(3.2 2.8)"/>'
-    + '<path d="' + jitterCircle(r, box, 9021, 1.6) + '" fill="none" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
-  a.querySelector(".glyph").innerHTML = '<path d="' + CHEV_L + '" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+    + '<path d="' + face + '" fill="' + yarn + '"/>'
+    + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  a.querySelector(".glyph").setAttribute("viewBox", "0.1 0 24 24");
+  a.querySelector(".glyph").innerHTML = '<path d="' + caretPath("left") + '" stroke="currentColor" stroke-width="' + CARET_PEN + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
 }
 function themeInit() {
   var t = null; try { t = localStorage.getItem("triotheo-status-theme"); } catch (e) {}
@@ -283,6 +277,7 @@ function themeInit() {
   function isDark() { var a = document.documentElement.getAttribute("data-theme"); return a === "dark" || (!a && matchMedia("(prefers-color-scheme: dark)").matches); }
   function draw() { var dark = isDark();
     b.querySelector(".btn-svg").innerHTML = coinSVG("var(--toggle-coin)", 9733);
+    b.querySelector(".glyph").setAttribute("viewBox", dark ? SUN_BOX : MOON_BOX);
     b.querySelector(".glyph").innerHTML = '<path d="' + (dark ? SUN_D : MOON_D) + '"/>';
     b.setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark"); }
   b.addEventListener("click", function () { var next = isDark() ? "light" : "dark"; document.documentElement.setAttribute("data-theme", next); try { localStorage.setItem("triotheo-status-theme", next); } catch (e) {} draw(); });
@@ -327,7 +322,7 @@ HTML = f"""<!doctype html>
   <footer class="foot"><span>Checked from GitHub&rsquo;s runners and served from GitHub Pages, so this page stays up when the site does not.</span></footer>
 </main>
 <script>{PEN}</script>
-<script>var SUN_D = {json.dumps(SUN_D)}, MOON_D = {json.dumps(MOON_D)};</script>
+<script>var SUN_D = {json.dumps(SUN_D)}, MOON_D = {json.dumps(MOON_D)}, SUN_BOX = {json.dumps(SUN_BOX)}, MOON_BOX = {json.dumps(MOON_BOX)};</script>
 <script>{JS}</script>
 </body>
 </html>
