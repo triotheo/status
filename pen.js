@@ -16,6 +16,11 @@ var SKETCH_PASS = { w1: 2.6, w2: 2.2, opacity: 0.6, slip: [1.3, 1.1] };
 var PILL_PASS = { w1: 2.2, w2: 2, opacity: 0.55, slip: [1.6, 1.4] };
 var RING_AMP = (0.28 * 26) / 13.5;
 function ringAmp(r) { return (RING_AMP * r) / 26; }
+/* the ring is one line, only thicker (#1949, CoinChrome.tsx RING_PEN / ringPen / ringIn): RING_PEN times the width it
+   drew at (2.6 to 3.3 in the 68 box), its path stepped in by half the growth so the coin keeps its size */
+var RING_PEN = 3.3 / 2.6;
+function ringPen(w) { return Math.round(w * RING_PEN * 100) / 100; }
+function ringIn(w) { return (ringPen(w) - w) / 2; }
 function calmPillAmp(r) { return Math.min(PILL_AMP, (CALM_PILL * r) / 13.5); }
 function calmCornerAmp(r) { return CALM_HAND.corner * Math.pow(Math.max(0, Math.min(1, r / 16)), 1.5); }
 function isPillBox(h, radius) { return radius >= h / 2 - 1; }
