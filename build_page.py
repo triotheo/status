@@ -34,9 +34,16 @@ PEN = (HERE / "pen.js").read_text()
 # 5507 through the landing's own jitterCircle — copied exactly. Regenerate them from that source if the landing's change.
 SUN_D = "M 15.8 12.0 Q 15.8 12.0 15.5 12.9 Q 15.2 13.8 14.4 14.3 Q 13.6 14.8 12.8 15.3 Q 12.0 15.7 11.1 15.4 Q 10.2 15.1 9.3 14.6 Q 8.5 14.0 7.9 13.0 Q 7.3 12.0 8.0 11.1 Q 8.8 10.2 9.4 9.4 Q 10.0 8.6 11.0 8.2 Q 12.0 7.7 12.9 8.4 Q 13.7 9.0 14.7 9.5 Q 15.6 9.9 15.7 11.0 Z M 17.9 12.6 L 21.2 12.7 M 16.7 17.8 L 17.8 19.5 M 12.6 18.9 L 12.6 20.2 M 7.3 15.8 L 4.7 17.2 M 4.9 11.3 L 2.1 11.5 M 8.0 6.7 L 7.5 5.8 M 13.2 6.2 L 14.5 3.9 M 16.4 7.8 L 18.8 6.4"
 MOON_D = "M 15.5 18.9 Q 15.5 18.9 14.4 19.1 Q 13.3 19.3 12.1 19.1 Q 10.9 18.9 9.3 19.0 Q 7.6 19.0 6.6 18.3 Q 5.5 17.5 5.3 16.4 Q 5.0 15.3 4.5 13.7 Q 4.1 12.1 4.5 10.6 Q 4.9 9.2 5.3 7.8 Q 5.7 6.5 7.2 5.8 Q 8.6 5.0 9.5 4.5 Q 10.5 4.0 11.8 4.1 Q 13.1 4.2 14.4 4.7 Q 15.7 5.3 16.5 5.4 Q 17.4 5.6 16.1 5.0 Q 14.9 4.5 13.7 4.3 Q 12.5 4.1 11.5 5.1 Q 10.6 6.1 9.9 6.6 Q 9.2 7.0 9.3 8.8 Q 9.4 10.5 9.6 11.2 Q 9.8 12.0 10.0 12.8 Q 10.2 13.6 11.3 14.6 Q 12.4 15.7 14.2 15.3 Q 15.9 15.0 16.5 14.7 Z"
-# The coin centres its glyph's box, so each is drawn at its own ink's offset (#1865; Landing.tsx / TopBar.tsx SUN_BOX / MOON_BOX).
-SUN_BOX = "-0.35 0.05 24 24"
-MOON_BOX = "-1.4 -0.35 24 24"
+# The coin centres its glyph's box, so each is drawn at its own ink's offset, on the drawn disc's centre (#1865, #1949), and
+# the glyph draws at the coins' own weight (#1949, THEME_PEN): all three read from the dashboard, which pins them to
+# TopBar.tsx and Landing.tsx (check_pen_parity.mjs (6)), so the page cannot drift from them.
+m = re.search(r'\nvar SUN_BOX = "([^"]+)", MOON_BOX = "([^"]+)";', DASH); assert m, "theme boxes"
+SUN_BOX, MOON_BOX = m.group(1), m.group(2)
+m = re.search(r"\nvar THEME_PEN = ([0-9.]+);", DASH); assert m, "theme pen"
+THEME_PEN = m.group(1)
+# THE LINE BETWEEN ROWS (#1949): one straight line, the dashboard's ROW_RULE_W (Learn's --row-rule-w), where it was 1.5px dashed
+m = re.search(r"\nROW_RULE_W = (\d+)\n", DASH); assert m, "row rule"
+ROW_RULE_W = m.group(1)
 
 CSS = f"""
 {faces}
@@ -76,10 +83,10 @@ h1 {{ margin: 0; font-size: 30px; font-weight: 800; letter-spacing: 0.05em; line
 .hcoin .btn-svg {{ position: absolute; inset: 0; pointer-events: none; }}
 .hcoin svg.glyph {{ position: relative; width: 32px; height: 32px; }}
 /* THE THEME GLYPH IS THE LANDING'S (owner note 2026-10-17: "it needs to match what the light mode icon looks like on the
-   TrioTheo landing page… the icon itself is too big"): its hand-drawn moon and sun at its 19px, 26px under 900px where the
-   landing (and Learn) draw them bigger; plum on the purple coin, white lines in dark mode — the landing toggle's own rule */
-.theme svg.glyph {{ width: 19px; height: 19px; }}
-@media (max-width: 900px) {{ .theme svg.glyph {{ width: 26px; height: 26px; }} }}
+   TrioTheo landing page… the icon itself is too big"): its hand-drawn moon and sun at 26px at every width, Learn's and the
+   landing's THEME_GLYPH_PX since #1949 (the owner: "the icon seems thin"; at 19px in the 54px coin the odd free space set it
+   half a pixel off); plum on the purple coin, white lines in dark mode — the landing toggle's own rule */
+.theme svg.glyph {{ width: 26px; height: 26px; }}
 .theme {{ color: #2d0f42; }}
 @media (prefers-color-scheme: dark) {{ :root:not([data-theme="light"]) .theme {{ color: #ffffff; }} }}
 :root[data-theme="dark"] .theme {{ color: #ffffff; }}
@@ -97,7 +104,7 @@ h2 {{ margin: 0 0 12px; font-size: 13px; font-weight: 800; letter-spacing: 0.08e
 .banner-title {{ font-size: 24px; font-weight: 800; letter-spacing: 0.03em; line-height: 1.2; }}
 .checked {{ margin: -6px 0 18px; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }}
 /* COMPONENTS — a name, a status word, a thin uptime strip, the caption under it */
-.row {{ padding: 12px 0; border-top: 1.5px dashed var(--nav-border); }}
+.row {{ padding: 12px 0; border-top: {ROW_RULE_W}px solid var(--nav-border); }}
 .row:first-of-type {{ border-top: 0; padding-top: 2px; }}
 .row-top {{ display: flex; align-items: center; gap: 10px; }}
 .name {{ flex: 1; min-width: 0; font-size: 18px; font-weight: 800; color: var(--headline-ink); letter-spacing: 0.02em; }}
@@ -118,7 +125,7 @@ h2 {{ margin: 0 0 12px; font-size: 13px; font-weight: 800; letter-spacing: 0.08e
 .days-cap {{ display: flex; justify-content: space-between; align-items: baseline; margin-top: 5px; font-size: 12px; font-weight: 600; color: var(--faint); letter-spacing: 0.03em; font-variant-numeric: tabular-nums; }}
 .days-cap b {{ color: var(--muted); font-weight: 800; }}
 /* PAST INCIDENTS — a day at a time, the last fourteen, newest first */
-.dayblk {{ padding: 14px 0 12px; border-top: 1.5px dashed var(--nav-border); }}
+.dayblk {{ padding: 14px 0 12px; border-top: {ROW_RULE_W}px solid var(--nav-border); }}
 .dayblk:first-of-type {{ border-top: 0; padding-top: 2px; }}
 .dayhd {{ font-size: 16px; font-weight: 800; color: var(--headline-ink); letter-spacing: 0.02em; }}
 .none {{ margin: 6px 0 0; font-size: 14px; font-weight: 600; color: var(--faint); }}
@@ -130,7 +137,7 @@ h2 {{ margin: 0 0 12px; font-size: 13px; font-weight: 800; letter-spacing: 0.08e
 .upd span {{ font-size: 14px; color: var(--ink); }}
 .upd small {{ grid-column: 2; font-size: 12px; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; }}
 .quiet {{ font-size: 15px; font-weight: 600; color: var(--muted); }}
-.more {{ display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 14px; padding-top: 12px; border-top: 1.5px dashed var(--nav-border); }}
+.more {{ display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 14px; padding-top: 12px; border-top: {ROW_RULE_W}px solid var(--nav-border); }}
 .pcoin {{ position: relative; width: 54px; height: 54px; border: 0; background: none; padding: 0; cursor: pointer; display: grid; place-items: center; flex: none; }}
 .pcoin:disabled {{ cursor: default; }}
 .pcoin .btn-svg {{ position: absolute; inset: 0; pointer-events: none; }}
@@ -151,10 +158,10 @@ function dateHd(d) { return d.toLocaleDateString(undefined, { month: "short", da
 function dur(a, b) { var m = Math.max(1, Math.round((new Date(b || Date.now()) - new Date(a)) / 60000)); return m < 60 ? m + " min" : (m / 60).toFixed(1).replace(/\.0$/, "") + " h"; }
 function localDay(iso) { var d = new Date(iso); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 function coinSVG(yarn, seed) {
-  var box = 68, r = 26, ring = "color-mix(in srgb, " + yarn + " 80%, #000000)", face = jitterCircle(r, box, seed, Math.min(1.6, ringAmp(r)));
+  var box = 68, r = 26 - ringIn(2.6), ring = "color-mix(in srgb, " + yarn + " 80%, #000000)", face = jitterCircle(r, box, seed, Math.min(1.6, ringAmp(r)));
   return '<svg viewBox="0 0 ' + box + ' ' + box + '" aria-hidden="true" style="' + SVG_STYLE + '">'
     + '<path d="' + face + '" fill="' + yarn + '"/>'
-    + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
+    + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="' + ringPen(2.6) + '" stroke-linecap="round"/></svg>';
 }
 /* a FILLED drawn card — the banner — in the calm pen's hand (calmSketchPaths, the fill in its line's own path; #1851) */
 function fillCard(el, yarn) {
@@ -254,19 +261,19 @@ function render() {
 // CoinBack, as the Learn app draws it: a ghost coin at seed 9021 in the family yarn, the ring the yarn's 78%
 // dark variant at the calm ring hand, the fill in the ring's own path (#1851), the chevron the house's one caret (caretPath) in the 60% mark
 function coinInto(el, yarn, ghost) {
-  var ring = "color-mix(in srgb, " + yarn + " 78%, #000000)", box = 68, r = 26;
+  var ring = "color-mix(in srgb, " + yarn + " 78%, #000000)", box = 68, r = 26 - ringIn(2.6);
   var fill = ghost ? "var(--coin-ghost)" : yarn, stroke = ghost ? "var(--nav-border)" : ring, face = jitterCircle(r, box, 9021, Math.min(1.6, ringAmp(r)));
   el.querySelector(".btn-svg").innerHTML = '<svg viewBox="0 0 ' + box + ' ' + box + '" aria-hidden="true" style="' + SVG_STYLE + '">'
     + '<path d="' + face + '" fill="' + fill + '"/>'
-    + '<path d="' + face + '" fill="none" stroke="' + stroke + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
+    + '<path d="' + face + '" fill="none" stroke="' + stroke + '" stroke-width="' + ringPen(2.6) + '" stroke-linecap="round"/></svg>';
   el.style.color = ghost ? "var(--divider-ink)" : "color-mix(in srgb, " + yarn + " 60%, #000000)";
 }
 function backInit() {
   var a = document.getElementById("back"), yarn = "var(--brand-blue)", ring = "color-mix(in srgb, " + yarn + " 78%, #000000)";
-  var box = 68, r = 26, face = jitterCircle(r, box, 9021, Math.min(1.6, ringAmp(r)));
+  var box = 68, r = 26 - ringIn(2.6), face = jitterCircle(r, box, 9021, Math.min(1.6, ringAmp(r)));
   a.querySelector(".btn-svg").innerHTML = '<svg viewBox="0 0 ' + box + ' ' + box + '" aria-hidden="true" style="' + SVG_STYLE + '">'
     + '<path d="' + face + '" fill="' + yarn + '"/>'
-    + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="2.6" stroke-linecap="round"/></svg>';
+    + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="' + ringPen(2.6) + '" stroke-linecap="round"/></svg>';
   a.querySelector(".glyph").setAttribute("viewBox", "0.1 0 24 24");
   a.querySelector(".glyph").innerHTML = '<path d="' + caretPath("left") + '" stroke="currentColor" stroke-width="' + CARET_PEN + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
 }
@@ -313,7 +320,7 @@ HTML = f"""<!doctype html>
     <a id="back" class="hcoin back" href="https://triotheo.com/" aria-label="Back to triotheo.com" title="Back to triotheo.com"><span class="btn-svg"></span><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"></svg></a>
     <span class="mark" aria-hidden="true"><img class="light" alt="" src="{uri(MARK, 'image/svg+xml')}"><img class="dark" alt="" src="{uri(MARK_DARK, 'image/svg+xml')}"></span>
     <div class="brand-text"><span class="eyebrow">TrioTheo</span><h1>Status</h1><p class="sub">Is triotheo.com up right now?</p></div>
-    <button id="theme" class="hcoin theme" type="button" aria-label="Switch theme"><span class="btn-svg"></span><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg></button>
+    <button id="theme" class="hcoin theme" type="button" aria-label="Switch theme"><span class="btn-svg"></span><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="{THEME_PEN}" stroke-linecap="round" stroke-linejoin="round"></svg></button>
   </header>
   <section id="banner" class="card banner" data-seed="9701"><span class="btn-svg"></span></section>
   <p id="checked" class="checked"></p>
