@@ -32,7 +32,8 @@ faces = "\n".join(
 PEN = (HERE / "pen.js").read_text()
 # THE THEME COIN WEARS THE LANDING'S GLYPHS (owner note 2026-10-17): Landing.tsx SUN_D / MOON_D — seeds 5501 · 5502 ·
 # 5507 through the landing's own jitterCircle — copied exactly. Regenerate them from that source if the landing's change.
-SUN_D = "M 15.8 12.0 Q 15.8 12.0 15.5 12.9 Q 15.2 13.8 14.4 14.3 Q 13.6 14.8 12.8 15.3 Q 12.0 15.7 11.1 15.4 Q 10.2 15.1 9.3 14.6 Q 8.5 14.0 7.9 13.0 Q 7.3 12.0 8.0 11.1 Q 8.8 10.2 9.4 9.4 Q 10.0 8.6 11.0 8.2 Q 12.0 7.7 12.9 8.4 Q 13.7 9.0 14.7 9.5 Q 15.6 9.9 15.7 11.0 Z M 17.9 12.6 L 21.2 12.7 M 16.7 17.8 L 17.8 19.5 M 12.6 18.9 L 12.6 20.2 M 7.3 15.8 L 4.7 17.2 M 4.9 11.3 L 2.1 11.5 M 8.0 6.7 L 7.5 5.8 M 13.2 6.2 L 14.5 3.9 M 16.4 7.8 L 18.8 6.4"
+# (#1987 round 4: the sun's disc closes smooth, midpoint to midpoint, as Learn's always has; it began "M 15.8 12.0 Q 15.8 12.0")
+SUN_D = "M 15.7 11.0 Q 15.8 12.0 15.5 12.9 Q 15.2 13.8 14.4 14.3 Q 13.6 14.8 12.8 15.3 Q 12.0 15.7 11.1 15.4 Q 10.2 15.1 9.3 14.6 Q 8.5 14.0 7.9 13.0 Q 7.3 12.0 8.0 11.1 Q 8.8 10.2 9.4 9.4 Q 10.0 8.6 11.0 8.2 Q 12.0 7.7 12.9 8.4 Q 13.7 9.0 14.7 9.5 Q 15.6 9.9 15.7 11.0 Z M 17.9 12.6 L 21.2 12.7 M 16.7 17.8 L 17.8 19.5 M 12.6 18.9 L 12.6 20.2 M 7.3 15.8 L 4.7 17.2 M 4.9 11.3 L 2.1 11.5 M 8.0 6.7 L 7.5 5.8 M 13.2 6.2 L 14.5 3.9 M 16.4 7.8 L 18.8 6.4"
 MOON_D = "M 15.5 18.9 Q 15.5 18.9 14.4 19.1 Q 13.3 19.3 12.1 19.1 Q 10.9 18.9 9.3 19.0 Q 7.6 19.0 6.6 18.3 Q 5.5 17.5 5.3 16.4 Q 5.0 15.3 4.5 13.7 Q 4.1 12.1 4.5 10.6 Q 4.9 9.2 5.3 7.8 Q 5.7 6.5 7.2 5.8 Q 8.6 5.0 9.5 4.5 Q 10.5 4.0 11.8 4.1 Q 13.1 4.2 14.4 4.7 Q 15.7 5.3 16.5 5.4 Q 17.4 5.6 16.1 5.0 Q 14.9 4.5 13.7 4.3 Q 12.5 4.1 11.5 5.1 Q 10.6 6.1 9.9 6.6 Q 9.2 7.0 9.3 8.8 Q 9.4 10.5 9.6 11.2 Q 9.8 12.0 10.0 12.8 Q 10.2 13.6 11.3 14.6 Q 12.4 15.7 14.2 15.3 Q 15.9 15.0 16.5 14.7 Z"
 # The coin centres its glyph's box, so each is drawn at its own ink's offset, on the drawn disc's centre (#1865, #1949), and
 # the glyph draws at the coins' own weight (#1949, THEME_PEN): all three read from the dashboard, which pins them to
@@ -85,11 +86,11 @@ h1 {{ margin: 0; font-size: 30px; font-weight: 800; letter-spacing: 0.05em; line
 /* THE THEME GLYPH IS THE LANDING'S (owner note 2026-10-17: "it needs to match what the light mode icon looks like on the
    TrioTheo landing page… the icon itself is too big"): its hand-drawn moon and sun at 26px at every width, Learn's and the
    landing's THEME_GLYPH_PX since #1949 (the owner: "the icon seems thin"; at 19px in the 54px coin the odd free space set it
-   half a pixel off); plum on the purple coin, white lines in dark mode — the landing toggle's own rule */
+   half a pixel off); THE COIN'S OWN MARK since #1987 (the conductor's Q7, "no coin wears a black ring", on the owner's s9: the
+   fill at 60% to black, Learn's .topbar-coin.topbar-theme and the dashboard's .tcoin), where it was plum on the purple coin and
+   white lines in dark mode — the landing toggle's old rule */
 .theme svg.glyph {{ width: 26px; height: 26px; }}
-.theme {{ color: #2d0f42; }}
-@media (prefers-color-scheme: dark) {{ :root:not([data-theme="light"]) .theme {{ color: #ffffff; }} }}
-:root[data-theme="dark"] .theme {{ color: #ffffff; }}
+.theme {{ color: color-mix(in srgb, var(--toggle-coin) 60%, #000000); }}
 .back {{ color: color-mix(in srgb, var(--brand-blue) 60%, #000); }}
 .coin .btn-svg {{ position: absolute; inset: 0; pointer-events: none; }}
 /* the pen draws a card into a viewBox padded 6px on every side; the SVG's box is padded the same
@@ -117,9 +118,9 @@ h2 {{ margin: 0 0 12px; font-size: 13px; font-weight: 800; letter-spacing: 0.08e
 :root[data-theme="dark"] .status.up {{ color: var(--brand-green); }}
 .coin {{ position: relative; flex: none; width: 18px; height: 18px; }}
 /* THE DAY TUBES (owner note 2026-10-17: "make those the same design as we do for the progress bar pills… double-layered"):
-   each day is Learn's progress-bar tube (SectionsView's DoodleBar) stood on its end — the sunken ground, the track's line
-   and its second line slipped (1.6, 1.4) at 0.55, then the fill in the day's yarn with its ring. A day with no check is
-   the empty tube. One SVG per strip, drawn at the strip's real width (the pen's rule) and redrawn when it changes. */
+   each day is Learn's progress-bar tube (SectionsView's DoodleBar) stood on its end — the sunken ground and the track's
+   ONE line at PILL_LINE 3.3 stepped in (#1987: it was 2.2 and a second line slipped (1.6, 1.4) at 0.55), then the fill in
+   the day's yarn with its ring. A day with no check is the empty tube. One SVG per strip, drawn at the strip's real width (the pen's rule) and redrawn when it changes. */
 .days {{ position: relative; height: 34px; margin-top: 12px; }}
 .days svg {{ position: absolute; left: -4px; top: -4px; overflow: visible; display: block; }}
 .days-cap {{ display: flex; justify-content: space-between; align-items: baseline; margin-top: 5px; font-size: 12px; font-weight: 600; color: var(--faint); letter-spacing: 0.03em; font-variant-numeric: tabular-nums; }}
@@ -163,15 +164,15 @@ function coinSVG(yarn, seed) {
     + '<path d="' + face + '" fill="' + yarn + '"/>'
     + '<path d="' + face + '" fill="none" stroke="' + ring + '" stroke-width="' + ringPen(2.6) + '" stroke-linecap="round"/></svg>';
 }
-/* a FILLED drawn card — the banner — in the calm pen's hand (calmSketchPaths, the fill in its line's own path; #1851) */
+/* a FILLED drawn card — the banner — in the calm pen's hand: ONE line at CARD_LINE stepped in 0.65 (calmCardLine, #1987 round 3;
+   it was two passes), the fill in its own path (#1851) */
 function fillCard(el, yarn) {
   var wrap = el.querySelector(".btn-svg"), seed = +el.dataset.seed, ring = "color-mix(in srgb, " + yarn + " 78%, #000000)";
   once(el, function () {
     var w = el.offsetWidth, h = el.offsetHeight; if (!w || !h) return;
-    var pp = calmSketchPaths(w, h, 20, seed), P = SKETCH_PASS;
+    var cl = calmCardLine(w, h, 20, seed);
     wrap.innerHTML = '<svg viewBox="-6 -6 ' + (w + 12) + ' ' + (h + 12) + '" aria-hidden="true" style="' + SVG_STYLE + '">'
-      + '<path d="' + pp[0] + '" fill="' + yarn + '" stroke="' + ring + '" stroke-width="' + P.w1 + '" stroke-linecap="round" stroke-linejoin="round"/>'
-      + '<path d="' + pp[1] + '" fill="none" stroke="' + ring + '" stroke-width="' + P.w2 + '" stroke-linecap="round" stroke-linejoin="round" opacity="' + P.opacity + '" transform="translate(' + P.slip[0] + ' ' + P.slip[1] + ')"/></svg>';
+      + '<path d="' + cl.d + '" transform="' + cl.t + '" fill="' + yarn + '" stroke="' + ring + '" stroke-width="' + CARD_LINE + '" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   });
 }
 var YARN = { up: "var(--brand-green)", partial: "var(--brand-orange)", down: "var(--brand-scarlet)" };
@@ -182,11 +183,10 @@ function drawStrip(el) {
   var n = list.length, slot = W / n, w = Math.min(slot - 3, 14), base = 9861 + (+el.dataset.seed) * 7, out = "";
   list.forEach(function (d, i) {
     var s = base + i * 13, yarn = YARN[d.cls], x = (i * slot + (slot - w) / 2).toFixed(1);
+    var tr = calmPillLine(w, H, s), bar = calmPillLine(w, H, s + 1);
     out += '<g transform="translate(' + x + ' 0)"><title>' + esc(d.tip) + '</title>'
-      + '<path d="' + drawnStadium(w, H, s) + '" fill="var(--coin-ghost)"/>'
-      + '<path d="' + drawnStadium(w, H, s) + '" fill="none" stroke="var(--nav-border)" stroke-width="' + PILL_PASS.w1 + '" stroke-linecap="round"/>'
-      + '<path d="' + drawnStadium(w, H, s + 7) + '" fill="none" stroke="var(--nav-border)" stroke-width="' + PILL_PASS.w2 + '" stroke-linecap="round" opacity="' + PILL_PASS.opacity + '" transform="translate(' + PILL_PASS.slip[0] + ' ' + PILL_PASS.slip[1] + ')"/>'
-      + (yarn ? '<path d="' + drawnStadium(w, H, s + 1) + '" fill="' + yarn + '" stroke="color-mix(in srgb, ' + yarn + ' 78%, #000000)" stroke-width="' + PILL_PASS.w2 + '" stroke-linecap="round"/>' : "")
+      + '<path d="' + tr.d + '" transform="' + tr.t + '" fill="var(--coin-ghost)" stroke="var(--nav-border)" stroke-width="' + PILL_LINE + '" stroke-linecap="round"/>'
+      + (yarn ? '<path d="' + bar.d + '" transform="' + bar.t + '" fill="' + yarn + '" stroke="color-mix(in srgb, ' + yarn + ' 78%, #000000)" stroke-width="' + PILL_LINE + '" stroke-linecap="round"/>' : "")
       + '</g>';
   });
   el.innerHTML = '<svg width="' + (W + 8) + '" height="' + (H + 8) + '" viewBox="-4 -4 ' + (W + 8) + ' ' + (H + 8) + '" aria-hidden="true">' + out + '</svg>';
