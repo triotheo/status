@@ -13,7 +13,18 @@ function mulberry(seed) { var s = seed >>> 0; return function () { return (s = (
 var CALM_PILL = 0.28, PILL_AMP = 0.8, SKETCH_AMP = 1.3, SKETCH_AMP_2 = 1.2, CALM_GAP = 8;
 var CALM_HAND = { card: CALM_PILL, card2: CALM_PILL, corner: 0.33, pill: CALM_PILL };
 var SKETCH_PASS = { w1: 2.6, w2: 2.2, opacity: 0.6, slip: [1.3, 1.1] };
-var PILL_PASS = { w1: 2.2, w2: 2, opacity: 0.55, slip: [1.6, 1.4] };
+/* the bars' and rails' baked edge tile's old two passes (Learn's EDGE_PASS, #1987): kept so
+   check_pen_parity.mjs holds the number to Learn's on every pen. This page draws no edge tile, and no line below reads it */
+var EDGE_PASS = { w1: 2.2, w2: 2, opacity: 0.55, slip: [1.6, 1.4] };
+/* NO LINE IS DRAWN TWICE (#1987, round 2 of the Icon Weight Board; Learn's drawnChrome.ts, number for number): a pill, a
+   badge and a tube are each ONE stroke at LINE_PEN (1.5) times their first pass (a pill's 2.2 is 3.3), its path stepped in
+   by half the growth so the outer ink stays where it was; the fill is that path's own. ROUND 3 (the owner's Q1 on cards,
+   "yes, recommended"): a card is one line too, its 2.6 at CARD_LINE 3.9 stepped in 0.65 (calmCardLine below) */
+var LINE_PEN = 1.5;
+function linePen(w) { return Math.round(w * LINE_PEN * 100) / 100; }
+function lineIn(w) { return (linePen(w) - w) / 2; }
+var PILL_LINE = linePen(2.2);
+function pillStep(from) { if (from === undefined) from = 2.2; return (PILL_LINE - from) / 2; }
 var RING_AMP = (0.28 * 26) / 13.5;
 function ringAmp(r) { return (RING_AMP * r) / 26; }
 /* the ring is one line, only thicker (#1949, CoinChrome.tsx RING_PEN / ringPen / ringIn): RING_PEN times the width it
@@ -38,9 +49,11 @@ function jitterRect(w, h, r, seed, amp, cornerAmp, gap) {
   seg(w - r, h, r, h, nTop); arc(r, h - r, Math.PI / 2, Math.PI, 3);
   seg(0, h - r, 0, r, nSide); arc(r, r, Math.PI, 1.5 * Math.PI, 3);
   var j = pts.map(function (p, i) { var a = cornerAmp !== undefined && corner[i] ? cornerAmp : amp; return [p[0] + (rnd() - 0.5) * 2 * a, p[1] + (rnd() - 0.5) * 2 * a]; });
-  var d = "M " + j[0][0].toFixed(1) + " " + j[0][1].toFixed(1);
-  for (var i = 1; i < j.length; i++) {
-    var px = j[i - 1][0], py = j[i - 1][1], x = j[i][0], y = j[i][1];
+  /* closed midpoint to midpoint (Learn's #1987 round 4; the owner: "There's still a jagged line"): from the midpoint of
+     the last and first points, through every point, wrapping; the chain had started AT the first and Z ran straight back */
+  var n = j.length, d = "M " + ((j[n - 1][0] + j[0][0]) / 2).toFixed(1) + " " + ((j[n - 1][1] + j[0][1]) / 2).toFixed(1);
+  for (var i = 0; i < n; i++) {
+    var px = j[i][0], py = j[i][1], x = j[(i + 1) % n][0], y = j[(i + 1) % n][1];
     d += " Q " + px.toFixed(1) + " " + py.toFixed(1) + " " + ((px + x) / 2).toFixed(1) + " " + ((py + y) / 2).toFixed(1);
   }
   return d + " Z";
@@ -109,6 +122,31 @@ function caretPath(dir) {
     return f(r[0] + 12) + " " + f(r[1] + 12);
   }).join(" ");
 }
+function fx2(v) { return +v.toFixed(2); }
+/* a card's one line: the sketch line's first pass 2.6 at LINE_PEN, 3.9, stepped in lineIn(2.6) = 0.65 each side */
+var CARD_LINE = linePen(SKETCH_PASS.w1);
+function cardStep() { return lineIn(SKETCH_PASS.w1); }
+/* A CARD'S ONE LINE (#1987, round 3): the calm sketch path on the box stepped in by `step` each side (the radius less the
+   step, so the corners stay concentric with the old line's outer ink), drawn at `t`, its stroke at CARD_LINE. Fill and line
+   are the one path. A box that is a pill by its radius draws calmPillLine at PILL_LINE instead */
+function calmCardLine(w, h, radius, seed, step) {
+  if (step === undefined) step = cardStep();
+  return { d: calmSketchPaths(w - 2 * step, h - 2 * step, Math.max(0, radius - step), seed)[0], t: "translate(" + fx2(step) + " " + fx2(step) + ")" };
+}
+/* THE DRAWN PILL'S ONE LINE: the calm stadium on the box stepped in by `step` each side, drawn at `t` (translate by the
+   step), so its stroke at PILL_LINE keeps the outer ink of the old first pass. Fill and line are the one path */
+function calmPillLine(w, h, seed, cap, step) {
+  if (step === undefined) step = pillStep();
+  var iw = w - 2 * step, ih = h - 2 * step;
+  var c = cap !== undefined && cap < h / 2 ? cap - step : undefined;
+  var a = calmPillAmp(Math.max(0, Math.min(c !== undefined && c < ih / 2 ? c : ih / 2, iw / 2)));
+  return { d: calmStadium(iw, ih, seed, a, c), t: "translate(" + fx2(step) + " " + fx2(step) + ")" };
+}
+/* Learn's count badge, ported for parity (check_pen_parity.mjs runs it byte for byte) and called by nothing here: ONE
+   line at the badge's own step, BADGE_STEP 0.85. The dashboard's own badge (badge(), below) was a single pass, never the
+   doubled pair, so it takes the pill's step through calmPillLine (#1987) */
+var BADGE_STEP = 0.85;
+function calmBadgeLine(w, h, seed) { return calmPillLine(w, h, seed, undefined, BADGE_STEP); }
 /* ── end of the calm pen ── */
 
 function jitterCircle(r, box, seed, amp) {
@@ -157,10 +195,18 @@ function sketch(el) {
   var ink = el.dataset.ink || "var(--border-strong)";
   once(el, function () {
     var w = el.offsetWidth, h = el.offsetHeight; if (!w || !h) return;
-    var pp = calmSketchPaths(w, h, radius, seed), P = SKETCH_PASS;
+    /* a box that is a pill by its radius (the Refresh pill's r26, the range pick's r22) IS a pill (#1987, as Learn's
+       useSketchOutline): one line at PILL_LINE stepped in from the sketch line's 2.6; a card is one line at CARD_LINE */
+    if (isPillBox(h, radius)) {
+      var ln = calmPillLine(w, h, seed, undefined, pillStep(SKETCH_PASS.w1));
+      wrap.innerHTML = '<svg viewBox="-6 -6 ' + (w + 12) + ' ' + (h + 12) + '" aria-hidden="true" style="' + SVG_STYLE + '">'
+        + '<path d="' + ln.d + '" transform="' + ln.t + '" fill="none" stroke="' + ink + '" stroke-width="' + PILL_LINE + '" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '</svg>';
+      return;
+    }
+    var cl = calmCardLine(w, h, radius, seed);
     wrap.innerHTML = '<svg viewBox="-6 -6 ' + (w + 12) + ' ' + (h + 12) + '" aria-hidden="true" style="' + SVG_STYLE + '">'
-      + '<path d="' + pp[0] + '" fill="none" stroke="' + ink + '" stroke-width="' + P.w1 + '" stroke-linecap="round" stroke-linejoin="round"/>'
-      + '<path d="' + pp[1] + '" fill="none" stroke="' + ink + '" stroke-width="' + P.w2 + '" stroke-linecap="round" stroke-linejoin="round" opacity="' + P.opacity + '" transform="translate(' + P.slip[0] + ' ' + P.slip[1] + ')"/>'
+      + '<path d="' + cl.d + '" transform="' + cl.t + '" fill="none" stroke="' + ink + '" stroke-width="' + CARD_LINE + '" stroke-linecap="round" stroke-linejoin="round"/>'
       + '</svg>';
   });
 }
@@ -170,13 +216,12 @@ function tube(el) {
   var ring = "color-mix(in srgb, " + yarn + " 80%, #000000)";
   once(el, function () {
     var w = el.offsetWidth; if (!w) return;
+    var tr = calmPillLine(w, H, seed);
     var svg = '<svg viewBox="-4 -4 ' + (w + 8) + ' ' + (H + 8) + '" aria-hidden="true">'
-      + '<path d="' + drawnStadium(w, H, seed) + '" fill="var(--coin-ghost)"/>'
-      + '<path d="' + drawnStadium(w, H, seed) + '" fill="none" stroke="var(--nav-border)" stroke-width="' + PILL_PASS.w1 + '" stroke-linecap="round"/>'
-      + '<path d="' + drawnStadium(w, H, seed + 7) + '" fill="none" stroke="var(--nav-border)" stroke-width="' + PILL_PASS.w2 + '" stroke-linecap="round" opacity="' + PILL_PASS.opacity + '" transform="translate(' + PILL_PASS.slip[0] + ' ' + PILL_PASS.slip[1] + ')"/>';
+      + '<path d="' + tr.d + '" transform="' + tr.t + '" fill="var(--coin-ghost)" stroke="var(--nav-border)" stroke-width="' + PILL_LINE + '" stroke-linecap="round"/>';
     if (pct > 0) {
-      var fw = Math.max(H, Math.round((pct / 100) * w));
-      svg += '<path d="' + drawnStadium(fw, H, seed + 1) + '" fill="' + yarn + '" stroke="' + ring + '" stroke-width="' + PILL_PASS.w2 + '" stroke-linecap="round"/>';
+      var fw = Math.max(H, Math.round((pct / 100) * w)), bar = calmPillLine(fw, H, seed + 1);
+      svg += '<path d="' + bar.d + '" transform="' + bar.t + '" fill="' + yarn + '" stroke="' + ring + '" stroke-width="' + PILL_LINE + '" stroke-linecap="round"/>';
     }
     el.innerHTML = svg + '</svg>';
   });
