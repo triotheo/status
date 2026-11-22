@@ -10,7 +10,8 @@ What it writes, beside itself:
   status.json     the latest verdict per service (what the page shows at the top)
   history.json    one entry per check, kept for HISTORY_DAYS (the uptime tubes and the day strips)
   incidents.json  every transition down→up with its duration (the incident list)
-  notify.txt      ONLY when something should be said on Discord — the workflow posts it and deletes it
+  notify-down.txt ONLY when a service went down: the workflow posts it to Google Chat's Alerts space
+  notify-back.txt ONLY when a service came back: posted to the Activity space (both deleted once posted)
 
 Two rules that keep it honest and quiet:
   · a probe is retried PROBE_TRIES times with a pause before it counts as failed this run, and a
@@ -105,29 +106,33 @@ def main() -> int:
     (HERE / "history.json").write_text(json.dumps(history, separators=(",", ":")) + "\n")
 
     incidents = load("incidents.json", [])
-    said = []
+    said_down, said_back = [], []
     for sid, s in services.items():
         was, is_ = prev_state.get(sid), s["state"]
         if was == is_ or was is None:
             continue
         if is_ == "down":
             incidents.append({"service": sid, "name": s["name"], "started": now.isoformat(), "ended": None, "note": s["note"]})
-            said.append(f"🔴 **{s['name']} is down** — {s['note'] or 'no answer'} on two checks in a row")
+            said_down.append(f"- {s['name']} is down: {s['note'] or 'no answer'} on two checks in a row")
         else:
             for inc in reversed(incidents):
                 if inc["service"] == sid and inc["ended"] is None:
                     inc["ended"] = now.isoformat()
                     mins = int((now - datetime.fromisoformat(inc["started"])).total_seconds() // 60)
-                    said.append(f"🟢 **{s['name']} is back** after about {mins} min")
+                    said_back.append(f"- {s['name']} is back after about {mins} min")
                     break
             else:
-                said.append(f"🟢 **{s['name']} is back**")
+                said_back.append(f"- {s['name']} is back")
     (HERE / "incidents.json").write_text(json.dumps(incidents[-200:], indent=1) + "\n")
-    if said:
-        msg = "**triotheo.com status**\n" + "\n".join(said)
-        if len(sys.argv) > 1:
-            msg += f"\n<https://{sys.argv[1]}>"
-        (HERE / "notify.txt").write_text(msg)
+    # Chat's own syntax, no emoji (the house style, lib/_notify_functions.py); notify.py adds the
+    # `[NEEDS YOU]` tag to the down message, the back message has none
+    for fname, said in (("notify-down.txt", said_down), ("notify-back.txt", said_back)):
+        if said:
+            msg = "**triotheo.com status**\n\n" + "\n".join(said)
+            if len(sys.argv) > 1:
+                msg += f"\n\nhttps://{sys.argv[1]}"
+            (HERE / fname).write_text(msg)
+    said = said_down + said_back
 
     line = "  ".join(f"{k}:{'up' if v['ok_this_run'] else 'FAIL'}({v['ms']}ms)" for k, v in services.items())
     print(f"{now.isoformat()}  overall={overall}  {line}" + ("  → notify" if said else ""))
