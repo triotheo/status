@@ -39,29 +39,20 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Probe the site
-        # stdlib only; writes status.json / history.json / incidents.json, and notify.txt only
+        # stdlib only; writes status.json / history.json / incidents.json, and notify-down.txt / notify-back.txt only
         # when a service changed state (down after two consecutive failed runs; back at once)
         run: python3 check.py "${{ vars.STATUS_HOST || 'status.triotheo.com' }}"
 
-      - name: Say it on Discord, if there is anything to say
-        if: hashFiles('notify.txt') != ''
-        # never let a failed alert stop the check from being recorded (2026-11-22): Discord is retired and
-        # its hook answers 403, so from 05:00Z every run exited here and the page froze at 04:50Z showing
-        # "up". The alert moves to Google Chat in triotheo/platform#1972; until then the page is the record.
+      - name: Say it on Google Chat, if there is anything to say
+        if: hashFiles('notify-down.txt', 'notify-back.txt') != ''
+        # never let a failed alert stop the check from being recorded (2026-11-22): the Discord hook answered
+        # 403, so from 05:00Z every run exited here and the page froze at 04:50Z showing "up". A down line
+        # goes to TrioTheo Alerts, a back line to TrioTheo Activity (triotheo/platform#1972).
         continue-on-error: true
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: |
-          if [ -z "$DISCORD_WEBHOOK" ]; then
-            echo "::warning::notify.txt was written but DISCORD_WEBHOOK is not set — nobody was told:"; cat notify.txt; exit 0
-          fi
-          python3 - <<'PY'
-          import json, os, urllib.request
-          body = json.dumps({"flags": 4, "content": open("notify.txt").read()[:1900]}).encode()
-          req = urllib.request.Request(os.environ["DISCORD_WEBHOOK"], data=body, headers={"Content-Type": "application/json"})
-          with urllib.request.urlopen(req, timeout=15) as r: print("discord:", r.status)
-          PY
-          rm -f notify.txt
+          CHAT_WEBHOOK_ALERTS: ${{ secrets.CHAT_WEBHOOK_ALERTS }}
+          CHAT_WEBHOOK_ACTIVITY: ${{ secrets.CHAT_WEBHOOK_ACTIVITY }}
+        run: python3 notify.py
 
       - name: Record the check
         # one commit per run keeps the history honest; the page reads these files straight off Pages

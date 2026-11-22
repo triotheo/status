@@ -21,16 +21,21 @@ happened to be running. This repository is the answer to that.
   in a run, and a service is called *down* only when it failed on two consecutive runs — GitHub's
   runners are intermittently blocked at the host's edge, and one unlucky run is not an outage. A
   recovery is reported at once.
-- **When a service changes state** the workflow posts one line to Discord through the `DISCORD_WEBHOOK`
-  secret: `🔴 Learn lessons is down — no answer on two checks in a row`, then `🟢 … is back after about
-  12 min`. Nothing is posted while nothing changes.
+- **When a service changes state** the workflow posts to Google Chat (`notify.py`). A service going down
+  goes to the TrioTheo Alerts space through the `CHAT_WEBHOOK_ALERTS` secret, opening with `` `[NEEDS YOU]` ``,
+  then `Learn lessons is down: no answer on two checks in a row`. A service coming back goes to the TrioTheo
+  Activity space through `CHAT_WEBHOOK_ACTIVITY`, with no tag: `Learn lessons is back after about 12 min`.
+  Nothing is posted while nothing changes. If a post fails, or a secret is not set, the run only warns and
+  prints the lines, and the check is still recorded.
 
 ## Setting it up (once)
 
 1. Create this repository **public** (Pages and Actions minutes are free there; nothing in it is
    private — it holds probe results).
 2. *Settings → Pages*: deploy from branch `main`, folder `/ (root)`.
-3. *Settings → Secrets → Actions*: add `DISCORD_WEBHOOK` (the same webhook the deploy notices use).
+3. *Settings → Secrets and variables → Actions*: add `CHAT_WEBHOOK_ALERTS` and `CHAT_WEBHOOK_ACTIVITY`. Copy
+   each value from Google Chat (the TrioTheo Alerts or TrioTheo Activity space, Apps & integrations, Webhooks)
+   straight into the secret's value box, and nowhere else.
 4. Optionally a custom domain: a `CNAME` file holding `status.triotheo.com` and a CNAME record at the
    registrar pointing `status` at `<owner>.github.io`. Until then the page is at
    `https://<owner>.github.io/<repo>/`.
