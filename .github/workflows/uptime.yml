@@ -45,6 +45,10 @@ jobs:
 
       - name: Say it on Discord, if there is anything to say
         if: hashFiles('notify.txt') != ''
+        # never let a failed alert stop the check from being recorded (2026-11-22): Discord is retired and
+        # its hook answers 403, so from 05:00Z every run exited here and the page froze at 04:50Z showing
+        # "up". The alert moves to Google Chat in triotheo/platform#1972; until then the page is the record.
+        continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
