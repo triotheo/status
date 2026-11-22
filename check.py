@@ -33,10 +33,11 @@ HERE = Path(__file__).resolve().parent
 SERVICES = [
     # id, name, url, what must be true of the answer
     ("site",    "triotheo.com",     "https://triotheo.com/",                       {"status": 200, "ctype": "text/html"}),
-    ("api",     "API",              "https://triotheo.com/api/health",             {"status": 200}),
+    # /api/health is answered by the landing's HTML fallback (200 text/html), so it can never go red; the
+    # site router's challenge route is a real API answer and must be JSON (#2034)
+    ("api",     "API",              "https://triotheo.com/api/site/challenge",     {"status": 200, "ctype": "application/json"}),
     ("lessons", "Learn lessons",    "https://triotheo.com/learn/character_studies/character-job/manifest.json",
                                                                                   {"status": 200, "ctype": "application/json"}),
-    ("beta",    "beta.triotheo.com", "https://beta.triotheo.com/",                 {"status": 200}),
 ]
 PROBE_TRIES, PROBE_PAUSE, TIMEOUT = 3, 8, 20
 HISTORY_DAYS = 30

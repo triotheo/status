@@ -11,9 +11,9 @@ happened to be running. This repository is the answer to that.
 ## How it works
 
 - **`check.py`** runs every ten minutes on a GitHub Actions schedule (`.github/workflows/uptime.yml`)
-  and probes four things: the site, the API's health route, **one lesson manifest** (because the site
+  and probes three things: the site, the API's challenge route (JSON, not the landing's HTML), **one lesson manifest** (because the site
   can be up while the lessons readers are served are stale — the manifest must come back as JSON,
-  not the app's HTML fallback), and the beta host. Standard library only.
+  not the app's HTML fallback). Standard library only.
 - It writes **`status.json`** (the latest verdict), **`history.json`** (one entry per check, kept 30
   days — the uptime tubes) and **`incidents.json`** (every down→up transition with its duration), and
   commits them. **`index.html`** reads those three files and draws the page.
