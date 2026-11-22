@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-22T18:20:14+00:00",
+ "checked_at": "2026-11-22T18:30:14+00:00",
  "overall": "up",
  "services": {
   "site": {
@@ -7,15 +7,15 @@
    "url": "https://triotheo.com/",
    "state": "up",
    "ok_this_run": true,
-   "ms": 271,
+   "ms": 213,
    "note": ""
   },
   "api": {
    "name": "API",
-   "url": "https://triotheo.com/api/health",
+   "url": "https://triotheo.com/api/site/challenge",
    "state": "up",
    "ok_this_run": true,
-   "ms": 246,
+   "ms": 176,
    "note": ""
   },
   "lessons": {
@@ -23,23 +23,14 @@
    "url": "https://triotheo.com/learn/character_studies/character-job/manifest.json",
    "state": "up",
    "ok_this_run": true,
-   "ms": 224,
-   "note": ""
-  },
-  "beta": {
-   "name": "beta.triotheo.com",
-   "url": "https://beta.triotheo.com/",
-   "state": "up",
-   "ok_this_run": true,
-   "ms": 309,
+   "ms": 163,
    "note": ""
   }
  },
  "raw": {
   "site": true,
   "api": true,
-  "lessons": true,
-  "beta": true
+  "lessons": true
  },
  "every_minutes": 10,
  "source": "GitHub Actions runners"
