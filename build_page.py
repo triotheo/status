@@ -308,7 +308,7 @@ HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TrioTheo Status</title>
-<meta name="description" content="Is triotheo.com up right now? Live checks of the site, the Learn lessons, the API and the beta host, from outside the server.">
+<meta name="description" content="Is triotheo.com up right now? Live checks of the site, the Learn lessons and the API, from outside the server.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" sizes="96x96" href="{uri(FAV_PNG, 'image/png')}">
 <link rel="icon" type="image/svg+xml" href="{uri(FAV_SVG, 'image/svg+xml')}">
