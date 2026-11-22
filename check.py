@@ -34,7 +34,7 @@ SERVICES = [
     # id, name, url, what must be true of the answer
     ("site",    "triotheo.com",     "https://triotheo.com/",                       {"status": 200, "ctype": "text/html"}),
     ("api",     "API",              "https://triotheo.com/api/health",             {"status": 200}),
-    ("lessons", "Learn lessons",    "https://triotheo.com/learn/guess_who/guess-lazarus/manifest.json",
+    ("lessons", "Learn lessons",    "https://triotheo.com/learn/character_studies/character-job/manifest.json",
                                                                                   {"status": 200, "ctype": "application/json"}),
     ("beta",    "beta.triotheo.com", "https://beta.triotheo.com/",                 {"status": 200}),
 ]
