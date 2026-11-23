@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-23T02:30:14+00:00",
+ "checked_at": "2026-11-23T02:40:10+00:00",
  "overall": "up",
  "services": {
   "site": {
@@ -7,7 +7,7 @@
    "url": "https://triotheo.com/",
    "state": "up",
    "ok_this_run": true,
-   "ms": 83,
+   "ms": 98,
    "note": ""
   },
   "api": {
@@ -15,7 +15,7 @@
    "url": "https://triotheo.com/api/site/challenge",
    "state": "up",
    "ok_this_run": true,
-   "ms": 60,
+   "ms": 56,
    "note": ""
   },
   "lessons": {
