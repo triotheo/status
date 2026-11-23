@@ -1,0 +1,31 @@
+name: test-alert
+
+# Send one clearly marked TEST line to each Google Chat space the status monitor posts to (triotheo/platform#1972),
+# so the two hooks can be proved without waiting for a real outage. Run by hand only (Actions, test-alert, Run
+# workflow). It writes the same two files check.py writes on a change of state and sends them through the same
+# notify.py, so a test that arrives proves the real path; it records nothing and touches no status file.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false   # the job never pushes
+
+      - name: Write the two test lines
+        run: |
+          printf '%s\n' '**triotheo.com status**' '' '- Test only: the status monitor can reach TrioTheo Alerts. Nothing is down, and nothing needs doing.' > notify-down.txt
+          printf '%s\n' '**triotheo.com status**' '' '- Test only: the status monitor can reach TrioTheo Activity.' > notify-back.txt
+
+      - name: Send them to Google Chat
+        env:
+          CHAT_WEBHOOK_ALERTS: ${{ secrets.CHAT_WEBHOOK_ALERTS }}
+          CHAT_WEBHOOK_ACTIVITY: ${{ secrets.CHAT_WEBHOOK_ACTIVITY }}
+        run: python3 notify.py

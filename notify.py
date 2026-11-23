@@ -38,8 +38,9 @@ def main() -> int:
             continue
         message = f"{tag}\n\n{text}" if tag else text
         body = json.dumps({"text": message[:4000], "markupSyntax": "MARKUP_SYNTAX_MARKDOWN"}).encode()
-        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json; charset=UTF-8"})
         try:
+            # inside the try: Request() raises a ValueError that names the URL on a value with no scheme
+            req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json; charset=UTF-8"})
             with urllib.request.urlopen(req, timeout=15) as r:
                 print(f"chat {env}: {r.status}")
         except Exception as e:  # noqa: BLE001 — never echo the URL (an HTTPError's repr can carry it)
