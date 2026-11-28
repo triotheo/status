@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-28T06:30:10+00:00",
+ "checked_at": "2026-11-28T06:40:09+00:00",
  "overall": "up",
  "services": {
   "site": {
@@ -15,7 +15,7 @@
    "url": "https://triotheo.com/api/site/challenge",
    "state": "up",
    "ok_this_run": true,
-   "ms": 106,
+   "ms": 104,
    "note": ""
   },
   "lessons": {
@@ -23,7 +23,7 @@
    "url": "https://triotheo.com/learn/character_studies/character-job/manifest.json",
    "state": "up",
    "ok_this_run": true,
-   "ms": 90,
+   "ms": 84,
    "note": ""
   }
  },
