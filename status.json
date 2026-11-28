@@ -1,36 +1,36 @@
 {
- "checked_at": "2026-11-28T01:30:13+00:00",
+ "checked_at": "2026-11-28T01:40:14+00:00",
  "overall": "up",
  "services": {
   "site": {
    "name": "triotheo.com",
    "url": "https://triotheo.com/",
    "state": "up",
-   "ok_this_run": false,
-   "ms": 20014,
-   "note": "no answer error: URLError"
+   "ok_this_run": true,
+   "ms": 82,
+   "note": ""
   },
   "api": {
    "name": "API",
    "url": "https://triotheo.com/api/site/challenge",
    "state": "up",
-   "ok_this_run": false,
-   "ms": 20064,
-   "note": "no answer error: URLError"
+   "ok_this_run": true,
+   "ms": 51,
+   "note": ""
   },
   "lessons": {
    "name": "Learn lessons",
    "url": "https://triotheo.com/learn/character_studies/character-job/manifest.json",
    "state": "up",
-   "ok_this_run": false,
-   "ms": 20064,
-   "note": "no answer error: URLError"
+   "ok_this_run": true,
+   "ms": 49,
+   "note": ""
   }
  },
  "raw": {
-  "site": false,
-  "api": false,
-  "lessons": false
+  "site": true,
+  "api": true,
+  "lessons": true
  },
  "every_minutes": 10,
  "source": "GitHub Actions runners"
